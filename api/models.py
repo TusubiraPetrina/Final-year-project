@@ -27,11 +27,10 @@ class Farmer(models.Model):
     def get_absolute_url(self):
         return reverse('farmer-detail', args=[str(self.id)])
 
-class Preciptation(models.Model):
-    preciptation_rate= models.DecimalField(verbose_name="preciptation rate(mm)",max_digits=5,decimal_places=3)
+class Precipitation(models.Model):
+    preciptation_rate= models.DecimalField(verbose_name="precipitation rate(mm)",max_digits=5,decimal_places=3)
     def __str__(self):
         """String for representing the Model object."""
-        return self.preciptation_rate
+        return self.precipitation_rate
     def get_absolute_url(self):
-        return reverse('preciptation-detail', args=[str(self.id)])
-
+        return reverse('precipitation-detail', args=[str(self.id)])
