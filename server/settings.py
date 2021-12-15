@@ -75,10 +75,10 @@ WSGI_APPLICATION = "server.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "final_db",
-        "USER": "root",
-        "PASSWORD": "qwerty1234",
-        "HOST": "localhost",
+        "NAME": "heroku_99ceaa67448f10d",
+        "USER": "bfcb94124c8b7f",
+        "PASSWORD": "9806c755",
+        "HOST": "us-mm-auto-dca-05-a.cleardb.net",
         "PORT": "3306",
     }
 }
