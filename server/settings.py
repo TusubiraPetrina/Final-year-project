@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "django-insecure-#t4x$0#-w4^i85lt=&f@8wax%xw78cn*x)tdvpt)@$q(^w4a!$"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -75,11 +75,14 @@ WSGI_APPLICATION = "server.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "heroku_99ceaa67448f10d",
-        "USER": "bfcb94124c8b7f",
-        "PASSWORD": "9806c755",
-        "HOST": "us-mm-auto-dca-05-a.cleardb.net",
+        "NAME": "heroku_c8f046535dfed17",
+        "USER": "bbf6868438a760",
+        "PASSWORD": "3a4c5d3b",
+        "HOST": "us-cdbr-east-05.cleardb.net",
         "PORT": "3306",
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
+        },
     }
 }
 
@@ -102,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-DJANGO_SUPERUSER_PASSWORD = 'FinalYearProject456'
+DJANGO_SUPERUSER_PASSWORD = "FinalYearProject456"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -166,8 +169,8 @@ REST_FRAMEWORK = {
 } """
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=30),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
@@ -185,8 +188,8 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=1),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(minutes=1),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=10),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(minutes=30),
     # custom
     "AUTH_COOKIE": "access_token",  # Cookie name. Enables cookies if value is set.
     "AUTH_COOKIE_DOMAIN": None,  # A string like "example.com", or None for standard domain cookie.
