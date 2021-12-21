@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+
+from helpers.email import NewPassword, PasswordConfirm, PasswordReset
 from .login import LoginView, RegisterView, LogoutView
 
 urlpatterns = [
@@ -11,10 +13,26 @@ urlpatterns = [
     path(
         "logout/", 
         LogoutView.as_view(), 
-        name="sign_out"),
+        name="sign_out",
+        ),
     path(
         "register/",
         RegisterView.as_view(),
         name="sign_up",
+    ),
+    path(
+        "forgot_password/",
+        PasswordReset.as_view(),
+        name="forgot_password",
+    ),
+    path(
+        "password_token/",
+        PasswordConfirm.as_view(),
+        name="password_token",
+    ),
+    path(
+        "reset_password/",
+        NewPassword.as_view(),
+        name="reset_password",
     ),
 ]
