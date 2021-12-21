@@ -163,6 +163,13 @@ REST_FRAMEWORK = {
     # )
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'webmail.mak.ac.ug'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 993
+EMAIL_HOST_USER = 'george.kivumbi@students.mak.ac.ug'
+EMAIL_HOST_PASSWORD = 'P@ss1234'
+
 """ OAUTH2_PROVIDER = {
     # this is the list of available scopes
     'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}

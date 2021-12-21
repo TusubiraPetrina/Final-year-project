@@ -130,7 +130,7 @@ def PreciBasicView(request):
 
         previousPage = 1
 
-        preci_values = Preciptation.objects.all()
+        preci_values = Precipitation.objects.all()
 
         page = request.GET.get("page", 1)
 
