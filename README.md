@@ -71,6 +71,26 @@ it returns a response showing a success message for updating data of the user.
 
 for DELETE: it does not take in any input and returns a message showing succesful deletion of user whose id was given as part of the url.
 
+## api/forgot_password/
+
+Allowed methods: POST
+This route allows a user to request to reset their password. it takes in the users email as input in JSON format:
+    {
+        "email":"johndoe@email.com"
+    }
+
+It returns the user that a message has been sent to their email for a reset token.
+
+## api/reset_password/
+
+Allowed methods: POST
+This route allows a user to reset their password after getting the reset token in an email. it takes input such as:
+
+    {
+        "resetValue":"************************"
+        "email":"johndoe@email.com",
+        "password": "**************"
+    }
 ## api/precipitation/
 
 Allowed methods: GET, POST

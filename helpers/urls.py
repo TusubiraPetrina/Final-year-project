@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from helpers.email import NewPassword, PasswordConfirm, PasswordReset
+from helpers.email import PasswordConfirm, PasswordReset
 from .login import LoginView, RegisterView, LogoutView
 
 urlpatterns = [
@@ -25,14 +25,14 @@ urlpatterns = [
         PasswordReset.as_view(),
         name="forgot_password",
     ),
-    path(
-        "password_token/",
-        PasswordConfirm.as_view(),
-        name="password_token",
-    ),
+    #path(
+    #    "password_token/",
+    #    PasswordConfirm.as_view(),
+    #    name="password_token",
+    #),
     path(
         "reset_password/",
-        NewPassword.as_view(),
+        PasswordConfirm.as_view(),
         name="reset_password",
     ),
 ]
