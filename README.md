@@ -75,6 +75,7 @@ for DELETE: it does not take in any input and returns a message showing succesfu
 
 Allowed methods: POST
 This route allows a user to request to reset their password. it takes in the users email as input in JSON format:
+
     {
         "email":"johndoe@email.com"
     }

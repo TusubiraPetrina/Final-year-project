@@ -1,6 +1,12 @@
+import os
+import json
 from datetime import datetime
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.sites.shortcuts import get_current_site
 from django.middleware import csrf
+from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,7 +14,9 @@ from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.models import User
 from django.conf import settings
 from rest_framework import status
+from django.template.loader import render_to_string
 from api.models import Farmer
+from .email import ResetEmail
 
 
 def get_tokens_for_user(user):
@@ -50,7 +58,7 @@ class LoginView(APIView):
                 )
                 
                 csrf.get_token(request)
-                response.data = {"Success": "Login successfully", "data": data}
+                response.data = {"message": "Login successfully", "data": data}
 
                 return response
 
@@ -73,7 +81,7 @@ class RegisterView(APIView):
 
             # serializer = FarmerSerializer(data=request.data)
 
-            # print(data)
+            #print(data)
             try:
                 # check if user exists
                 user_check = User.objects.get(email=data["email"])
@@ -91,41 +99,17 @@ class RegisterView(APIView):
                 )
                 newUser.first_name = data["first_name"]
                 newUser.last_name = data["last_name"]
-                newUser.is_active = True
+                #newUser.is_active = True
 
                 newUser.save()
 
                 try:
                     # check for farmer-User data
                     newFarmer = User.objects.get(username=data["username"])
-                    newFarmerV = User.objects.get(username=data["username"])
-
-                    """ try:
-                        crop = Maize.objects.get(maize_type=data["maize"])
-                    except Exception as error:
-                        return Response({'message':f'{error}'}, status=status.HTTP_400_BAD_REQUEST) """
 
                     newFarmer_id = newFarmer.id
                     newFarmer_username = newFarmer.username
 
-                    """ newFarmerData = dict(
-                        user=newFarmerV,
-                        username=newFarmer_username,
-                        email=data["email"],
-                        first_name=data["first_name"],
-                        last_name=data["last_name"],
-                        is_active=True,
-                        telephone=data["telephone"],
-                        region=data["region"],
-                    ) """
-
-                    # print(newFarmerData)
-
-                    """ newfarmer_serializer = FarmerSerializer(
-                        data=newFarmerData, context={"request": request}
-                    ) """
-
-                    # if newfarmer_serializer.is_valid():
                     valid_newFarmer = Farmer()
 
                     valid_newFarmer.unique_id = "F0" + str(newFarmer_id)
@@ -134,17 +118,63 @@ class RegisterView(APIView):
                     valid_newFarmer.email = data["email"]
                     valid_newFarmer.first_name = data["first_name"]
                     valid_newFarmer.last_name = data["last_name"]
-                    valid_newFarmer.is_active = True
+                    #valid_newFarmer.is_active = True
                     valid_newFarmer.telephone = data["telephone"]
                     valid_newFarmer.region = data["region"]
 
                     valid_newFarmer.save()
 
-                    data = dict(
-                        message="Farmer Created Successfully",
-                        farmerID=f"ID: {str(valid_newFarmer.unique_id)}",
+                    mail_subject = "Activate AgriPredict Account"
+
+                    current_site = get_current_site(request)
+
+                    token = ResetEmail.generate_token()
+
+                    eToken = urlsafe_base64_encode(force_bytes(token))
+
+                    refreshID = urlsafe_base64_encode(force_bytes(newUser.email))
+                    #message = f"Please confirm your account by clicking here: http://{current_site.domain}"
+
+                    message = render_to_string(
+                        'activateEmail.html',
+                        {
+                            'user': newUser,
+                            'domain': current_site.domain,
+                            'token': eToken,
+                            'refreshID': refreshID,
+                        }
                     )
-                    return Response(data, status=status.HTTP_201_CREATED)
+
+                    from_email = settings.EMAIL_HOST_USER
+
+                    recipient_list = [ f"{data['email']}", ]
+                    
+                    try:
+
+                        send_mail(mail_subject, message, from_email, recipient_list)
+
+                        activation_data =   {
+                            "email": newUser.email,
+                            "token": token
+                        }
+
+                        activationInfo = json.dumps(activation_data, indent=4)
+
+                        try:
+                            with open('activate.json', 'w') as outfile:
+                                outfile.write(activationInfo)
+
+                        except Exception as write_exception:
+                            return Response({"message":f"{write_exception}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                    except Exception as exception:
+
+                        return Response({"message":f"{exception}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        
+                    data = dict(
+                        message=f"Please check {data['email']} to confirm your account",
+                    )
+                    return Response(data, status=status.HTTP_200_OK)
                     # else:
                     #    return Response(
                     #        "Server Error: serializer invalid", status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -152,12 +182,12 @@ class RegisterView(APIView):
 
                 except Exception as e:
                     return Response(
-                        f"Server Error: {e}",
+                        {"message":f"{e}"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
 
         except Exception as e:
-            return Response(f"Error: {e}")
+            return Response({"message":f"{e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LogoutView(APIView):

@@ -1,7 +1,8 @@
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
 
-from helpers.email import PasswordConfirm, PasswordReset
+from helpers.email import PasswordConfirm, PasswordReset, ConfirmAccount
 from .login import LoginView, RegisterView, LogoutView
 
 urlpatterns = [
@@ -26,13 +27,14 @@ urlpatterns = [
         name="forgot_password",
     ),
     #path(
-    #    "password_token/",
-    #    PasswordConfirm.as_view(),
-    #    name="password_token",
+    #    "activate/",
+    #    ConfirmAccount.as_view(),
+    #    name="confirm_account",
     #),
     path(
         "reset_password/",
         PasswordConfirm.as_view(),
         name="reset_password",
     ),
+    url(r"^activate/(?P<eToken>[0-9A-Za-z_\-]+)/(?P<refreshID>[0-9A-Za-z]+)/$", ConfirmAccount),
 ]
