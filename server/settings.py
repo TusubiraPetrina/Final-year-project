@@ -146,7 +146,10 @@ CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_WHITELIST = [
-    "https://localhost:3000",
+    "http://localhost:3000",
+    "http://localhost:19000",
+    "http://localhost:19002",
+    "http://localhost:19006",
 ]
 
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE"]
@@ -162,6 +165,14 @@ REST_FRAMEWORK = {
     #    'rest_framework.permissions.IsAuthenticated',
     # )
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+#EMAIL_USE_SSL = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'finalyear854@gmail.com'
+EMAIL_HOST_PASSWORD = 'finalYear146'
 
 """ OAUTH2_PROVIDER = {
     # this is the list of available scopes
