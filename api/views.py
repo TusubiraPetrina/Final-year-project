@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Farmer, Maize, Precipitation
-from .serializers import FarmerSerializer, MaizeSerializer, PrecipitationSerializer
+from .models import Farmer, Maize, Precipitation,Dataset
+from .serializers import FarmerSerializer, MaizeSerializer, PrecipitationSerializer,DatasetSerializer
 
 # Create your views here.
 
@@ -331,3 +331,8 @@ def PageNotFound(request, exception):
             },
             status=status.HTTP_404_NOT_FOUND
         )
+
+@api_view(['GET'])
+def dataset(request):
+    queryset = Dataset.objects.all()
+    serializer_class = DatasetSerializer

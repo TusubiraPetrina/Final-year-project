@@ -17,4 +17,5 @@ urlpatterns = [
     url(r"^precipitation/(?P<id>[0-9]+)$", PreciDetailView),
     url(r"^crop/$", MaizeBasicView),
     url(r"^crop/(?P<type>[a-z]+)$", MaizeDetailView),
+    url(r"^dataset/$", dataset),
 ]
