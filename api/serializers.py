@@ -34,4 +34,5 @@ class PrecipitationSerializer(serializers.ModelSerializer):
 class DatasetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
-        fields = '__all__'
+        # fields =['year', 'price', 'production','precipitation']
+        fields='__all__'
