@@ -4,9 +4,12 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
+from rest_framework.parsers import JSONParser
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Farmer, Maize, Precipitation
-from .serializers import FarmerSerializer, MaizeSerializer, PrecipitationSerializer
+from .models import Farmer, Maize, Precipitation,Dataset
+from .serializers import FarmerSerializer, MaizeSerializer, PrecipitationSerializer,DatasetSerializer
 
 # Create your views here.
 
@@ -331,3 +334,23 @@ def PageNotFound(request, exception):
             },
             status=status.HTTP_404_NOT_FOUND
         )
+
+@csrf_exempt
+@api_view(['GET'])
+def dataset(request):
+    snippets = Dataset.objects.all()
+    serializer = DatasetSerializer(snippets, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def dataByYear(request,year):
+    try:
+        snippet = Dataset.objects.get(year=year)
+        serializer = DatasetSerializer(snippet)
+        return Response(serializer.data)
+    except Dataset.DoesNotExist:
+        return Response(status=404)
+
+        serializer = SnippetSerializer(snippet)
+        return JsonResponse(serializer.data)
+

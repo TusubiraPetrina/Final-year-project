@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Farmer, Maize, Precipitation
+from .models import Farmer, Maize, Precipitation,Dataset
 
 
 class FarmerSerializer(serializers.ModelSerializer):
@@ -30,3 +30,9 @@ class PrecipitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Precipitation
         fields = "precipitation_rate"
+
+class DatasetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dataset
+        # fields =['year', 'price', 'production','precipitation']
+        fields='__all__'
