@@ -62,3 +62,13 @@ class Precipitation(models.Model):
 
     def get_absolute_url(self):
         return reverse("precipitation-detail", args=[str(self.id)])
+
+class Dataset(models.Model):
+    year = models.IntegerField()
+    production= models.DecimalField(max_digits=10,decimal_places=3)
+    precipitation= models.DecimalField(max_digits=10,decimal_places=3)
+    price= models.DecimalField(max_digits=10,decimal_places=3)
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.year
