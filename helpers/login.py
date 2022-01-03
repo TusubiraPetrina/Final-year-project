@@ -1,4 +1,5 @@
 import os
+import csv
 import json
 from datetime import datetime
 from django.utils.encoding import force_bytes, force_text
@@ -33,7 +34,7 @@ class LoginView(APIView):
     def post(self, request, format=None):
 
         data = request.data
-        
+
         response = Response()
 
         username = data.get("username", None)
@@ -164,13 +165,14 @@ class RegisterView(APIView):
 
                         send_mail(mail_subject, message, from_email, recipient_list)
 
-                        activation_data = {"email": newUser.email, "token": token}
+                        activation_data = [newUser.email, token]
 
-                        activationInfo = json.dumps(activation_data, indent=4)
+                        #activationInfo = json.dumps(activation_data, indent=4)
 
                         try:
-                            with open("activate.json", "w") as outfile:
-                                outfile.write(activationInfo)
+                            with open("activate.csv", "a") as outfile:
+                                writer = csv.writer(outfile)
+                                writer.writerow(activation_data)
 
                         except Exception as write_exception:
                             return Response(
