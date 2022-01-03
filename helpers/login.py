@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth import authenticate, login,logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.conf import settings
 from rest_framework import status
@@ -38,39 +38,47 @@ class LoginView(APIView):
         username = data.get("username", None)
         password = data.get("password", None)
 
-        user = authenticate(username=username, password=password)
+        try:
+            user = User.objects.get(username=username)
 
-        if user is not None:
+            user = authenticate(username=username, password=password)
 
-            if user.is_active:
+            if user is not None:
 
-                login(request, user)
+                if user.is_active:
 
-                data = get_tokens_for_user(user)
+                    login(request, user)
 
-                response.set_cookie(
-                    key=settings.SIMPLE_JWT["AUTH_COOKIE"],
-                    value=data["access"],
-                    expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
-                    secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-                    httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
-                    samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-                )
-                
-                csrf.get_token(request)
-                response.data = {"message": "Login successfully", "data": data}
+                    data = get_tokens_for_user(user)
 
-                return response
+                    response.set_cookie(
+                        key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                        value=data["access"],
+                        expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+                        secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+                        httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+                        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+                    )
 
+                    csrf.get_token(request)
+                    response.data = {"message": "Login successfully", "data": data}
+
+                    return response
+
+                else:
+                    return Response(
+                        {"No active": "This account is not active!!"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
             else:
                 return Response(
-                    {"No active": "This account is not active!!"},
+                    {"Invalid": "Invalid username or password!!"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-        else:
+
+        except ObjectDoesNotExist:
             return Response(
-                {"Invalid": "Invalid username or password!!"},
-                status=status.HTTP_404_NOT_FOUND,
+                {"message": "User doesnot exist"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -81,7 +89,7 @@ class RegisterView(APIView):
 
             # serializer = FarmerSerializer(data=request.data)
 
-            #print(data)
+            # print(data)
             try:
                 # check if user exists
                 user_check = User.objects.get(email=data["email"])
@@ -99,7 +107,7 @@ class RegisterView(APIView):
                 )
                 newUser.first_name = data["first_name"]
                 newUser.last_name = data["last_name"]
-                #newUser.is_active = True
+                # newUser.is_active = True
 
                 newUser.save()
 
@@ -118,7 +126,7 @@ class RegisterView(APIView):
                     valid_newFarmer.email = data["email"]
                     valid_newFarmer.first_name = data["first_name"]
                     valid_newFarmer.last_name = data["last_name"]
-                    #valid_newFarmer.is_active = True
+                    # valid_newFarmer.is_active = True
                     valid_newFarmer.telephone = data["telephone"]
                     valid_newFarmer.region = data["region"]
 
@@ -133,44 +141,49 @@ class RegisterView(APIView):
                     eToken = urlsafe_base64_encode(force_bytes(token))
 
                     refreshID = urlsafe_base64_encode(force_bytes(newUser.email))
-                    #message = f"Please confirm your account by clicking here: http://{current_site.domain}"
+                    # message = f"Please confirm your account by clicking here: http://{current_site.domain}"
 
                     message = render_to_string(
-                        'activateEmail.html',
+                        "activateEmail.html",
                         {
-                            'user': newUser,
-                            'domain': current_site.domain,
-                            'token': eToken,
-                            'refreshID': refreshID,
-                        }
+                            "user": newUser,
+                            "domain": current_site.domain,
+                            "token": eToken,
+                            "refreshID": refreshID,
+                        },
                     )
 
                     from_email = settings.EMAIL_HOST_USER
 
-                    recipient_list = [ f"{data['email']}", ]
-                    
+                    recipient_list = [
+                        f"{data['email']}",
+                    ]
+
                     try:
 
                         send_mail(mail_subject, message, from_email, recipient_list)
 
-                        activation_data =   {
-                            "email": newUser.email,
-                            "token": token
-                        }
+                        activation_data = {"email": newUser.email, "token": token}
 
                         activationInfo = json.dumps(activation_data, indent=4)
 
                         try:
-                            with open('activate.json', 'w') as outfile:
+                            with open("activate.json", "w") as outfile:
                                 outfile.write(activationInfo)
 
                         except Exception as write_exception:
-                            return Response({"message":f"{write_exception}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            return Response(
+                                {"message": f"{write_exception}"},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            )
 
                     except Exception as exception:
 
-                        return Response({"message":f"{exception}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                        
+                        return Response(
+                            {"message": f"{exception}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        )
+
                     data = dict(
                         message=f"Please check {data['email']} to confirm your account",
                     )
@@ -182,12 +195,14 @@ class RegisterView(APIView):
 
                 except Exception as e:
                     return Response(
-                        {"message":f"{e}"},
+                        {"message": f"{e}"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
 
         except Exception as e:
-            return Response({"message":f"{e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"message": f"{e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class LogoutView(APIView):
@@ -195,4 +210,6 @@ class LogoutView(APIView):
 
         logout(request)
 
-        return Response({"message":"Successfully Logged Out"}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Successfully Logged Out"}, status=status.HTTP_200_OK
+        )
