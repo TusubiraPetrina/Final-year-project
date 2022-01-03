@@ -1,4 +1,5 @@
 import os
+import csv
 import uuid
 import json
 from django.utils.encoding import force_bytes, force_text
@@ -33,7 +34,7 @@ class ResetEmail(APIView):
 
         email = data["email"]
 
-        resetInfo = {"email": f"{email}", "randomNumber": f"{ResetEmail.randomNumber}"}
+        resetInfo = [email, ResetEmail.randomNumber]
 
         try:
             subject = "AgriPredict Password Reset"
@@ -44,10 +45,11 @@ class ResetEmail(APIView):
 
             recipient_list = [f"{email}"]
 
-            resetData = json.dumps(resetInfo, indent=4)
+            # resetData = json.dumps(resetInfo, indent=4)
 
-            with open("reset.json", "w") as outfile:
-                outfile.write(resetData)
+            with open("reset.csv", "a") as outfile:
+                writer = csv.writer(outfile)
+                writer.writerow(resetInfo)
 
             try:
                 send_mail(subject, message, email_from, recipient_list)
@@ -114,13 +116,17 @@ class PasswordConfirm(APIView):
         email = data["email"]
 
         try:
+            rows = []
+            with open("reset.csv", "r") as openfile:
+                csvreader = csv.reader(openfile)
+                for row in csvreader:
+                    rows.append(row)
 
-            with open("reset.json", "r") as openfile:
-                resetInfo = json.load(openfile)
+            current_user = rows[-1]
 
-            if resetInfo["email"] == email:
+            if current_user[0] == email:
 
-                if resetInfo["randomNumber"] == resetValue:
+                if current_user[1] == resetValue:
 
                     try:
 
@@ -130,7 +136,7 @@ class PasswordConfirm(APIView):
 
                         user.save()
 
-                        if os.path.exists("reset.json"):
+                        """ if os.path.exists("reset.json"):
 
                             os.remove("reset.json")
 
@@ -139,12 +145,10 @@ class PasswordConfirm(APIView):
                             return Response(
                                 {"message": f"Reset File Error"},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            )
+                            ) """
 
                         return Response(
-                            {
-                                "message": "Password reset sucessfully"
-                            },
+                            {"message": "Password reset sucessfully"},
                             status=status.HTTP_200_OK,
                         )
 
@@ -185,17 +189,22 @@ def ConfirmAccount(request, eToken, refreshID):
         user_email = force_text(urlsafe_base64_decode(refreshID))
 
         try:
-            with open("activate.json", "r") as infile:
-                activateInfo = json.load(infile)
+            rows = []
+            with open("activate.csv", "r") as infile:
+                csvreader = csv.reader(infile)
+                for row in csvreader:
+                    rows.append(row)
 
-            if user_email == activateInfo['email']:
-                if token == activateInfo['token']:
+            current_user = rows[-1]
+
+            if user_email == current_user[0]:
+                if token == current_user[1]:
                     try:
                         inactive_user = User.objects.get(email=user_email)
 
                         inactive_farmer = Farmer.objects.get(email=user_email)
 
-                        inactive_user.is_active = True 
+                        inactive_user.is_active = True
 
                         inactive_farmer.is_active = True
 
@@ -205,7 +214,7 @@ def ConfirmAccount(request, eToken, refreshID):
 
                         login(request, inactive_user)
 
-                        if os.path.exists("activate.json"):
+                        """ if os.path.exists("activate.json"):
 
                             os.remove("activate.json")
 
@@ -214,19 +223,30 @@ def ConfirmAccount(request, eToken, refreshID):
                             return Response(
                                 {"message": f"Reset File Error"},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            )
+                            ) """
 
                         return Response(
-                            {"message":"Thank you for confirming your account. You can now login."},
+                            {
+                                "message": "Thank you for confirming your account. You can now login."
+                            },
                             status=status.HTTP_200_OK,
                         )
 
                     except ObjectDoesNotExist:
-                        return Response({"message":f"User with email {user_email} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response(
+                            {"message": f"User with email {user_email} does not exist"},
+                            status=status.HTTP_404_NOT_FOUND,
+                        )
                 else:
-                    return Response({"message":"Invalid token for email"}, status=status.HTTP_400_BAD_REQUEST)    
+                    return Response(
+                        {"message": "Invalid token for email"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             else:
-                return Response({"message":"Invalid Email for token"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"message": "Invalid Email for token"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         except Exception as file_exception:
             return Response(
                 {"message": f"{file_exception}"},
