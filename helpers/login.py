@@ -33,6 +33,7 @@ class LoginView(APIView):
     def post(self, request, format=None):
 
         data = request.data
+        
         response = Response()
 
         username = data.get("username", None)
