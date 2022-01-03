@@ -167,7 +167,7 @@ class RegisterView(APIView):
 
                         activation_data = [newUser.email, token]
 
-                        #activationInfo = json.dumps(activation_data, indent=4)
+                        
 
                         try:
                             with open("activate.csv", "a") as outfile:
