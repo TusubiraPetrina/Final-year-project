@@ -8,8 +8,15 @@ from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Farmer, Maize, Precipitation,Dataset
-from .serializers import FarmerSerializer, MaizeSerializer, PrecipitationSerializer,DatasetSerializer
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import User
+from .models import Farmer, Maize, Precipitation, Dataset, Repository
+from .serializers import (
+    FarmerSerializer,
+    MaizeSerializer,
+    PrecipitationSerializer,
+    DatasetSerializer,
+)
 
 # Create your views here.
 
@@ -324,26 +331,26 @@ def MaizeDetailView(request, type):
 
         return Response(message="Record Deleted", status=status.HTTP_204_NO_CONTENT)
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 def PageNotFound(request, exception):
 
     return Response(
-            {
-                "message": "Page Not Found",
-                "meta": f"{request.headers}"
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        {"message": "Page Not Found", "meta": f"{request.headers}"},
+        status=status.HTTP_404_NOT_FOUND,
+    )
+
 
 @csrf_exempt
-@api_view(['GET'])
+@api_view(["GET"])
 def dataset(request):
     snippets = Dataset.objects.all()
     serializer = DatasetSerializer(snippets, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-def dataByYear(request,year):
+
+@api_view(["GET"])
+def dataByYear(request, year):
     try:
         snippet = Dataset.objects.get(year=year)
         serializer = DatasetSerializer(snippet)
@@ -354,3 +361,103 @@ def dataByYear(request,year):
         serializer = SnippetSerializer(snippet)
         return JsonResponse(serializer.data)
 
+
+@api_view(["GET", "POST"])
+def RepositoryView(request):
+    try:
+        if request.method == "POST":
+
+            months = [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "November",
+                "December",
+            ]
+
+            regions = ["North", "South", "East", "West"]
+
+            data = request.data
+
+            try:
+
+                user = User.objects.get(username=data["username"])
+
+                if data["month"] not in months:
+
+                    return Response(
+                        {
+                            "message": "Invalid Month Format! Use (January, February,...)"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                else:
+                    if data["region"] not in regions:
+
+                        return Response(
+                            {"message": "Invalid Region! Use (North, South,...)"},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+
+                    else:
+                        record = Repository()
+
+                        record.username = data["username"]
+
+                        record.month = data["month"]
+
+                        record.region = data["region"]
+
+                        record.production = data["production"]
+
+                        record.price = data["price"]
+
+                        try:
+                            record.save()
+
+                            return Response(
+                                {"message": "successfully added"},
+                                status=status.HTTP_201_CREATED,
+                            )
+
+                        except Exception as exception:
+                            return Response(
+                                {"message": f"{exception}"},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            )
+            except ObjectDoesNotExist:
+
+                return Response(
+                    {"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+
+        elif request.method == "GET":
+
+            try:
+                repository = Repository.objects.all()
+
+                return Response({"data": f"{repository}"}, status=status.HTTP_200_OK)
+
+            except ObjectDoesNotExist:
+
+                return Response(
+                    {"message": "No data available"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+        else:
+            return Response(
+                {"message": "Method NOT Allowed"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
+    except Exception as exception:
+        return Response(
+            {"message": f"{exception}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

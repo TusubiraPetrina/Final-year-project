@@ -72,3 +72,14 @@ class Dataset(models.Model):
     def __str__(self):
         """String for representing the Model object."""
         return self.year
+
+class Repository(models.Model):
+    username = models.CharField(max_length=50, help_text="Enter username", null=False)
+    region = models.CharField(max_length=50, help_text="Enter username", null=False)
+    month = models.CharField(max_length=50, help_text="Enter username", null=False)
+    production = models.DecimalField(max_digits=10,decimal_places=3, null=False)
+    price = models.DecimalField(max_digits=10,decimal_places=3, null=False)
+    
+    
+    def __str__(self):
+        return self.region

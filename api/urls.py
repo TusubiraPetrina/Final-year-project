@@ -20,4 +20,5 @@ urlpatterns = [
     url(r"^dataset/$", dataset),
     # url(r"^dataset/<int:year>/$", dataByYear),
     path('dataset/<int:year>/', dataByYear),
+    url(r"^repository/$", RepositoryView),
 ]
