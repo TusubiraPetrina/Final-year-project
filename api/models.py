@@ -75,8 +75,8 @@ class Dataset(models.Model):
 
 class Repository(models.Model):
     username = models.CharField(max_length=50, help_text="Enter username", null=False)
-    region = models.CharField(max_length=50, help_text="Enter username", null=False)
-    month = models.CharField(max_length=50, help_text="Enter username", null=False)
+    region = models.CharField(max_length=50, help_text="Enter region", null=False)
+    month = models.CharField(max_length=50, help_text="Enter month", null=False)
     production = models.DecimalField(max_digits=10,decimal_places=3, null=False)
     price = models.DecimalField(max_digits=10,decimal_places=3, null=False)
     
