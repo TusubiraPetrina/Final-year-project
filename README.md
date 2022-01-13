@@ -92,6 +92,10 @@ This route allows a user to reset their password after getting the reset token i
         "email":"johndoe@email.com",
         "password": "**************"
     }
+
+## api/repository/
+Allowed methods: GET, POST
+Here a user can add data to the repository and also view data from the repository.
 ## api/precipitation/
 
 Allowed methods: GET, POST
