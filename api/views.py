@@ -1,3 +1,4 @@
+import json
 from enum import unique
 from django.core import paginator
 from django.shortcuts import render
@@ -10,12 +11,13 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
-from .models import Farmer, Maize, Precipitation, Dataset, Repository
+from .models import Farmer, Maize, Precipitation, Dataset, Repo
 from .serializers import (
     FarmerSerializer,
     MaizeSerializer,
     PrecipitationSerializer,
     DatasetSerializer,
+    RepositorySerializer,
 )
 
 # Create your views here.
@@ -384,7 +386,7 @@ def RepositoryView(request):
             regions = ["North", "South", "East", "West"]
 
             data = request.data
-
+            # print(data)
             try:
 
                 user = User.objects.get(username=data["username"])
@@ -407,9 +409,9 @@ def RepositoryView(request):
                         )
 
                     else:
-                        record = Repository()
+                        record = Repo()
 
-                        record.username = data["username"]
+                        record.user_name = data["username"]
 
                         record.month = data["month"]
 
@@ -438,13 +440,18 @@ def RepositoryView(request):
                     {"message": "User does not exist"}, status=status.HTTP_404_NOT_FOUND
                 )
 
-
         elif request.method == "GET":
 
             try:
-                repository = Repository.objects.all()
+                repository = Repo.objects.all()
 
-                return Response({"data": f"{repository}"}, status=status.HTTP_200_OK)
+                serialized_data = RepositorySerializer(repository, many=True)
+
+                all_data = json.dumps(serialized_data.data)
+
+                clean_data = json.loads(all_data)
+
+                return Response({"data": clean_data}, status=status.HTTP_200_OK)
 
             except ObjectDoesNotExist:
 

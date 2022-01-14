@@ -24,7 +24,7 @@ class Farmer(models.Model):
 
     unique_id = models.CharField(primary_key=True, max_length=100)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="BFarmersUsers")
-    username = models.CharField(max_length=100, default="johndoe", help_text="Enter username")
+    username = models.CharField(max_length=100, default="johndoe", help_text="Enter user_name")
     email = models.EmailField(unique=True, default="test@example.com", help_text="enter your email address")
     first_name = models.CharField(max_length=100, default="John", help_text="Enter first name")
     last_name = models.CharField(max_length=100,default="Doe", help_text="Enter last name")
@@ -35,7 +35,7 @@ class Farmer(models.Model):
     user_permissions = models.ManyToManyField(User, related_name='FarmerUserPermissions', blank=True)
     telephone = models.IntegerField(help_text="Enter 10 digit phone number")
     region = models.CharField(max_length=50, help_text="Enter region you grow maize")
-    #maize = models.ManyToManyField(Maize, help_text="Enter maize type")
+    
 
     class Meta:
         ordering = ["first_name", "last_name"]
@@ -73,12 +73,13 @@ class Dataset(models.Model):
         """String for representing the Model object."""
         return self.year
 
-class Repository(models.Model):
-    username = models.CharField(max_length=50, help_text="Enter username", null=False)
+class Repo(models.Model):
+    user_name = models.CharField(max_length=50, help_text="Enter username", null=False, blank=False)
     region = models.CharField(max_length=50, help_text="Enter region", null=False)
     month = models.CharField(max_length=50, help_text="Enter month", null=False)
     production = models.DecimalField(max_digits=10,decimal_places=3, null=False)
     price = models.DecimalField(max_digits=10,decimal_places=3, null=False)
-    
+
     def __str__(self):
+        """ string for representing Repository object(record) """
         return self.region

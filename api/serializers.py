@@ -1,38 +1,32 @@
 from rest_framework import serializers
-from .models import Farmer, Maize, Precipitation,Dataset
+from .models import Farmer, Maize, Precipitation,Dataset, Repo
 
 
 class FarmerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Farmer
-        fields = (
-            "unique_id",
-            "user",
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "is_active",
-            "telephone",
-            "region",
-            "maize",
-            
-        )
+        fields='__all__'
 
 
 class MaizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Maize
-        fields = ("maize_type", "seasonal_price", "production")
+        fields='__all__'
 
 
 class PrecipitationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Precipitation
-        fields = "precipitation_rate"
+        fields='__all__'
 
 class DatasetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
+        # fields =['year', 'price', 'production','precipitation']
+        fields='__all__'
+
+class RepositorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Repo
         # fields =['year', 'price', 'production','precipitation']
         fields='__all__'
