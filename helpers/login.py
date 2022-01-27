@@ -55,8 +55,7 @@ class LoginView(APIView):
 
                     response.set_cookie(
                         key=settings.SIMPLE_JWT["AUTH_COOKIE"],
-                        value=data["access"],
-                        session= "F0" + str(user.id),
+                        value=[data["access"],"F0" + str(user.id)],
                         expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
                         secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                         httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
