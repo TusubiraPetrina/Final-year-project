@@ -45,17 +45,19 @@ class LoginView(APIView):
 
             user = authenticate(username=username, password=password)
 
+
             if user is not None:
 
                 if user.is_active:
 
                     login(request, user)
 
-                    data = get_tokens_for_user(user)
+                    data = get_tokens_for_user(user)            
 
                     response.set_cookie(
                         key=settings.SIMPLE_JWT["AUTH_COOKIE"],
                         value=data["access"],
+                        session= "F0" + str(user.id),
                         expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
                         secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                         httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
