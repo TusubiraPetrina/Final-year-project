@@ -7,6 +7,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.sites.shortcuts import get_current_site
 from django.middleware import csrf
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
@@ -29,65 +30,95 @@ def get_tokens_for_user(user):
         "access": str(refresh.access_token),
     }
 
-
 class LoginView(APIView):
+    
+    @csrf_exempt
+    def get(self, request, format=None):
+        try: 
+            csrf.get_token(request)
+            return Response(
+                {"message":"Authorization Granted"},
+                status=status.HTTP_200_OK
+            )
+        except Exception as funcExc:
+            return Response(
+                {"Error":f"{funcExc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    """ @csrf_protect """
     def post(self, request, format=None):
 
-        data = request.data
-
-        response = Response()
-
-        username = data.get("username", None)
-        password = data.get("password", None)
-
         try:
-            user = User.objects.get(username=username)
+            if request.method == "POST":
+                data = request.data
 
-            user = authenticate(username=username, password=password)
+                response = Response()
 
-            if user is not None:
+                username = data.get("username", None)
+                password = data.get("password", None)
 
-                if user.is_active:
+                try:
+                    user = User.objects.get(username=username)
 
-                    login(request, user)
+                    user = authenticate(username=username, password=password)
 
-                    access_data = get_tokens_for_user(user)
+                    if user is not None:
 
-                    response.set_cookie(
-                        key=settings.SIMPLE_JWT["AUTH_COOKIE"],
-                        value=access_data["access"] + "::" + "F0" + str(user.id),
-                        expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
-                        secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
-                        httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
-                        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-                    )
+                        if user.is_active:
 
-                    csrf.get_token(request)
+                            login(request, user)
 
-                    response.data = {
-                        "message": "Login Successful",
-                        # "data": data
-                        }
-                        
-                    response['status'] = status.HTTP_200_OK
+                            access_data = get_tokens_for_user(user)
 
-                    return response
+                            response.set_cookie(
+                                key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+                                value=access_data["access"] + "::" + "F0" + str(user.id),
+                                expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+                                secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+                                httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+                                samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+                            )
 
-                else:
+                            """ csrf.get_token(request) """
+
+                            response.data = {
+                                "message": "Login Successful",
+                                "data": access_data
+                                }
+
+                            response['status'] = status.HTTP_200_OK
+
+                            return response
+
+                        else:
+                            return Response(
+                                {"No active": "This account is not active!!"},
+                                status=status.HTTP_403_FORBIDDEN,
+                            )
+                    else:
+                        return Response(
+                            {"Invalid": "Invalid username or password!!"},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
+
+                except ObjectDoesNotExist:
                     return Response(
-                        {"No active": "This account is not active!!"},
-                        status=status.HTTP_403_FORBIDDEN,
+                        {"message": "User doesnot exist"}, status=status.HTTP_404_NOT_FOUND
                     )
             else:
                 return Response(
-                    {"Invalid": "Invalid username or password!!"},
-                    status=status.HTTP_403_FORBIDDEN,
+                    {"Error":"Method NOT Allowed"},
+                    status=status.HTTP_405_METHOD_NOT_ALLOWED
                 )
-
-        except ObjectDoesNotExist:
+            
+        except Exception as funcExc:
             return Response(
-                {"message": "User doesnot exist"}, status=status.HTTP_404_NOT_FOUND
+                {"Error":f'{funcExc}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+        
 
 
 class RegisterView(APIView):
