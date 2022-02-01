@@ -63,10 +63,12 @@ class LoginView(APIView):
                     )
 
                     csrf.get_token(request)
+
                     response.data = {
                         "message": "Login Successful",
                         # "data": data
                         }
+                        
                     response['status'] = status.HTTP_200_OK
 
                     return response
