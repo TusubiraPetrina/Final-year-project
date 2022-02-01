@@ -30,10 +30,8 @@ def get_tokens_for_user(user):
         "access": str(refresh.access_token),
     }
 
-
-
-
 class LoginView(APIView):
+    
     @csrf_exempt
     def get(self, request, format=None):
         try: 
