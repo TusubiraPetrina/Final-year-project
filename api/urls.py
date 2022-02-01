@@ -6,19 +6,14 @@ from helpers.users import UserList, UserDetails, GroupList
 from .views import *
 
 urlpatterns = [
-    # path('login/', CustomAuthToken.as_view()),
-    # path('users/', UserList.as_view()),
-    # path('users/<id>', UserDetails.as_view()),
-    # path('groups/', GroupList.as_view()),
     path("", include("helpers.urls")),
     url(r"^farmers/$", FarmerBasicView),
-    url(r"^farmers/(?P<id>[A-Za-z0-9]+)$", FarmerDetailView),
+    path("farmers/<str:id>/", FarmerDetailView),
     url(r"^precipitation/$", PreciBasicView),
     url(r"^precipitation/(?P<id>[0-9]+)$", PreciDetailView),
     url(r"^crop/$", MaizeBasicView),
     url(r"^crop/(?P<type>[a-z]+)$", MaizeDetailView),
     url(r"^dataset/$", dataset),
-    # url(r"^dataset/<int:year>/$", dataByYear),
     path('dataset/<int:year>/', dataByYear),
     url(r"^repository/$", RepositoryView),
 ]
