@@ -51,11 +51,11 @@ class LoginView(APIView):
 
                     login(request, user)
 
-                    data = get_tokens_for_user(user)            
+                    access_data = get_tokens_for_user(user)
 
                     response.set_cookie(
                         key=settings.SIMPLE_JWT["AUTH_COOKIE"],
-                        value=[data["access"],"F0" + str(user.id)], 
+                        value=access_data["access"] + "::" + "F0" + str(user.id),
                         expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
                         secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
                         httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
@@ -63,19 +63,25 @@ class LoginView(APIView):
                     )
 
                     csrf.get_token(request)
-                    response.data = {"message": "Login successfully", "data": data}
+
+                    response.data = {
+                        "message": "Login Successful",
+                        # "data": data
+                        }
+                        
+                    response['status'] = status.HTTP_200_OK
 
                     return response
 
                 else:
                     return Response(
                         {"No active": "This account is not active!!"},
-                        status=status.HTTP_404_NOT_FOUND,
+                        status=status.HTTP_403_FORBIDDEN,
                     )
             else:
                 return Response(
                     {"Invalid": "Invalid username or password!!"},
-                    status=status.HTTP_404_NOT_FOUND,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
         except ObjectDoesNotExist:
@@ -167,8 +173,6 @@ class RegisterView(APIView):
 
                         activation_data = [newUser.email, token]
 
-                        
-
                         try:
                             with open("activate.csv", "a") as outfile:
                                 writer = csv.writer(outfile)
@@ -211,8 +215,15 @@ class RegisterView(APIView):
 class LogoutView(APIView):
     def post(self, request, format=None):
 
-        logout(request)
+        try:
+            logout(request)
 
-        return Response(
-            {"message": "Successfully Logged Out"}, status=status.HTTP_200_OK
-        )
+            return Response(
+                {"message": "Successfully Logged Out"}, 
+                status=status.HTTP_200_OK
+            )
+        except Exception as exception:
+            return Response(
+                {"Error":f"{exception}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
