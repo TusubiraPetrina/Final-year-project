@@ -137,6 +137,7 @@ class RegisterView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             ) """
 
+
     @csrf_exempt       
     def post(self, request, format=None):
         try:
