@@ -364,6 +364,7 @@ def dataByYear(request, year):
         return JsonResponse(serializer.data)
 
 
+@csrf_exempt
 @api_view(["GET", "POST"])
 def RepositoryView(request):
     try:
