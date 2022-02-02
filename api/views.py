@@ -22,7 +22,7 @@ from .serializers import (
 
 # Create your views here.
 
-
+@csrf_exempt
 @api_view(["GET"])
 def IndexView(request):
 
@@ -333,7 +333,7 @@ def MaizeDetailView(request, type):
 
         return Response(message="Record Deleted", status=status.HTTP_204_NO_CONTENT)
 
-
+@csrf_exempt
 @api_view(["GET"])
 def PageNotFound(request, exception):
 

@@ -122,6 +122,22 @@ class LoginView(APIView):
 
 
 class RegisterView(APIView):
+
+    """ @csrf_exempt
+    def get(self, request, format=None):
+        try: 
+            csrf.get_token(request)
+            return Response(
+                {"message":"Authorization Granted"},
+                status=status.HTTP_200_OK
+            )
+        except Exception as funcExc:
+            return Response(
+                {"Error":f"{funcExc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            ) """
+
+    @csrf_exempt       
     def post(self, request, format=None):
         try:
             data = request.data

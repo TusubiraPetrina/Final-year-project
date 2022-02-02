@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -28,6 +29,7 @@ class ResetEmail(APIView):
     def generate_token():
         return str(ResetEmail.randomNumber)
 
+    @csrf_exempt
     def post(request):
 
         data = request.data
@@ -74,6 +76,7 @@ class ResetEmail(APIView):
 
 class PasswordReset(APIView):
     # request to reset password before sending email
+    @csrf_exempt
     def post(self, request, format=None):
 
         try:
@@ -105,6 +108,7 @@ class PasswordReset(APIView):
 
 class PasswordConfirm(APIView):
     # inputing the new password
+    @csrf_exempt
     def post(request):
 
         data = request.data
@@ -178,7 +182,7 @@ class PasswordConfirm(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-
+@csrf_exempt
 @api_view(["GET"])
 def ConfirmAccount(request, eToken, refreshID):
     try:
